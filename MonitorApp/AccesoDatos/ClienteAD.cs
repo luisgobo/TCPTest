@@ -1,7 +1,6 @@
-﻿using Entidades;
+﻿using Entidades.Specific;
 using System;
 using System.Data.SqlClient;
-//using System.Windows.Forms;
 
 namespace MonitorApp.AccesoDatos
 {
@@ -11,17 +10,10 @@ namespace MonitorApp.AccesoDatos
         {
         }
 
-        public Cliente GetClienteById(int id)
+        public Cliente GetClienteById(string id)
         {
-            Cliente cliente = new Cliente();
-            string query = $"SELECT * FROM CLIENTE WHERE CLIENTEID ={id}";
-
-            //string consultaEstudiantes = "SELECT Estudiante.*, Sede.*  FROM [UEduca].[dbo].[Estudiante] INNER JOIN dbo.Sede ON dbo.Sede.IdSede = dbo.Estudiante.IdSede";
-
-            //if (sede != -1)
-            //{
-            //    consultaEstudiantes += " WHERE dbo.Estudiante.IdSede = @sede";
-            //}
+            Cliente cliente = null;
+            string query = $"SELECT IdCliente, Nombre, PrimerApellido, SegundoApellido, FechaNacimiento, Genero, Estado FROM Cliente WHERE IdCliente ={id}";
 
             SqlDataReader reader = null;
             try
@@ -29,32 +21,45 @@ namespace MonitorApp.AccesoDatos
                 if (ConexionDB.Connect())
                 {
                     SqlCommand comand = new SqlCommand(query, ConexionDB.GetConnection());
-                    //if (sede != -1)
-                    //    comand.Parameters.Add(new SqlParameter("@sede", sede));
-
                     reader = comand.ExecuteReader();
                     if (reader.HasRows)
                     {
-                        //while (reader.Read())
-                        //{
-                        //    cliente.Add(new Estudiante(reader.GetInt32(0), reader.GetString(2), reader.GetString(3), reader.GetString(4)
-                        //        , new Sede_universitaria(reader.GetInt32(7), reader.GetString(8)), reader.GetDateTime(5), reader.GetString(6).ToCharArray()[0]));
-                        //}
+                        while (reader.Read())
+                        {
+
+                            cliente = new Cliente
+                            {
+                                IdCliente = reader.GetString(0),
+                                Nombre = reader.GetString(1),
+                                PrimerApellido = reader.GetString(2),
+                                SegundoApellido = reader.GetString(3),
+                                FechaNacimiento = reader.GetDateTime(4),
+                                Genero = reader.GetString(5).ToCharArray()[0],
+                                Estado = reader.GetBoolean(6)
+                            };
+
+                            return cliente;
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception("Error:\n Con base de datos por favor revisar conexion.\n" + ex.Message);
+                throw new Exception("Error:\n The database Cannot be accessed.\n" + ex.Message);
             }
             finally
             {
                 try
                 {
-                    if (reader != null && !reader.IsClosed) reader.Close();
+                    if (reader != null && !reader.IsClosed)
+                    {
+                        reader.Close();
+                        ConexionDB.CloseConnection();
+                    }
                 }
-                catch (Exception ea)
+                catch (Exception ex)
                 {
+                    throw ex;
                 }
             }
 

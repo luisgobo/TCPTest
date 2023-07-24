@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Entidades
+namespace Entidades.Specific
 {
     public class Cliente
     {
@@ -16,11 +12,12 @@ namespace Entidades
         public char Genero { get; set; }
         public bool Estado { get; set; }
 
-        public string NombreCompleto {
-            get 
-            { 
-                return $"{Nombre} {PrimerApellido} {SegundoApellido}"; 
-            } 
+        public string NombreCompleto
+        {
+            get
+            {
+                return $"{Nombre} {PrimerApellido} {SegundoApellido}";
+            }
         }
 
         public Cliente(string idCliente, string nombre, string primerApellido, string segundoApellido, DateTime fechaNacimiento, char genero, bool estado)
@@ -34,6 +31,8 @@ namespace Entidades
             Estado = estado;
         }
 
-        public Cliente() { }
+        public Cliente()
+        {
+        }
     }
 }

@@ -1,13 +1,11 @@
-﻿using Entidades;
-using Entidades.Enums;
+﻿using Entidades.Enums;
 using Entidades.Generic;
+using Entidades.Handlers;
+using Entidades.Specific;
 using Newtonsoft.Json;
 using SimpleTCP;
 using System;
-using System.Security.Principal;
-using System.Text;
 using System.Windows.Forms;
-using System.Xml;
 
 namespace MonitorApp
 {
@@ -16,39 +14,56 @@ namespace MonitorApp
         SimpleTcpClient client;
         string clientName = string.Empty;
 
-
         public MainClient()
         {
-            InitializeComponent();
+            InitializeComponent();            
+            EnableUIComponents(false);
         }
+
 
         private void Main_Load(object sender, EventArgs e)
         {
+            
             Random rnd = new Random();
 
             client = new SimpleTcpClient
             {
                 StringEncoder = System.Text.Encoding.UTF8,
-                Delimiter = 0x13              
+                Delimiter = 0x13
             };
             client.DataReceived += Client_DataReceived;
-            
+
             clientName = "CLI-" + rnd.Next(10);
             lblHelloUser.Text = "Hello " + clientName;
         }
-        private void Client_DataReceived(object sender, SimpleTCP.Message e)
-        {
-            txtMessage.Invoke((MethodInvoker)delegate
+
+        private void Client_DataReceived(object sender, SimpleTCP.Message msg)
+        {            
+            var objData = PackageHandler<Cliente>.DeserializePackage(msg.MessageString);
+
+            if (objData is EventPackage<Cliente>)
             {
-                txtStatus.Text += e.MessageString.TrimEnd('\u0013');
-            });
+                Cliente cliente = null;
+                txtStatus.Invoke((MethodInvoker)delegate
+                {
+                    txtStatus.Text += "Server response Received..."+ Environment.NewLine;
+                    cliente = objData.GenericInstance;
+
+                    if (cliente != null)
+                        txtStatus.Text += $"Hello {cliente.NombreCompleto}!!!{Environment.NewLine}";
+                    else
+                        txtStatus.Text += "Sorry, client not found!!!{Environment.NewLine}";
+                });
+            }
         }
+
         private void btnConnect_Click(object sender, EventArgs e)
         {
             try
             {
                 btnConnect.Enabled = false;
                 client.Connect(txtHost.Text, int.Parse(txtPort.Text));
+                EnableUIComponents(true);
             }
             catch (Exception ex)
             {
@@ -56,36 +71,41 @@ namespace MonitorApp
                 btnConnect.Enabled = true;
             }
         }
+
         private void btnSend_Click(object sender, EventArgs e)
         {
             try
             {
-                string fullMsg = clientName + " says: " + txtMessage.Text + Environment.NewLine;
+                //string fullMsg = clientName + " says: " + txtMessage.Text + Environment.NewLine;
                 //client.WriteLineAndGetReply(fullMsg, TimeSpan.FromSeconds(3));
-                var usuario = new Cliente() { IdCliente = txtMessage.Text };
 
-                var myEvent = new EventPackage<Cliente>()
-                { 
-                    ClientId = clientName,
-                    ActionType = ActionTypes.GetSpecific,
-                    GenericInstance = usuario
-                };
-
-                var jsonSerializerSettings = new JsonSerializerSettings()
+                txtStatus.Invoke((MethodInvoker)delegate
                 {
-                    TypeNameHandling = TypeNameHandling.All
-                };
-                var json = JsonConvert.SerializeObject(myEvent, jsonSerializerSettings);
-                client.WriteLineAndGetReply(json, TimeSpan.FromSeconds(3));
+                    txtStatus.Text += "Sending data to Server..." + Environment.NewLine;
+                    var usuario = new Cliente() { IdCliente = txtMessage.Text };
+                    var myEvent = new EventPackage<Cliente>()
+                    {
+                        ClientId = clientName,
+                        ActionType = ActionTypes.GetSpecific,
+                        GenericInstance = usuario
+                    };
 
+                    var request = PackageHandler<Cliente>.SerializePackage(myEvent);
+                    client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(3));
+                });
 
-
+               
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"An error has happening",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "An error has happening", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-    }    
+        private void EnableUIComponents(bool enableUI)
+        {
+            txtMessage.Enabled = enableUI;
+            txtStatus.Enabled = enableUI;
+            btnSend.Enabled = enableUI;
+        }
+    }
 }
