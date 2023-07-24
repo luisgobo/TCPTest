@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Entidades.Specific
+namespace TcpTestLN.Specific
 {
     public class Cliente
     {

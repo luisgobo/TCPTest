@@ -91,6 +91,10 @@
       <Project>{74898EC8-740F-4264-AED9-AABA2713AF37}</Project>
       <Name>Entidades</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TcpTestLN\TcpTestLN.csproj">
+      <Project>{9502235D-FB72-40F1-87A8-B2FBBDFCFDCC}</Project>
+      <Name>TcpTestLN</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

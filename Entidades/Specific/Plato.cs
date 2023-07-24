@@ -1,4 +1,4 @@
-﻿namespace Entidades.Specific
+﻿namespace TcpTestLN.Specific
 {
     public class Plato
     {

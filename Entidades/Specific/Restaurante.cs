@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Entidades.Specific
+namespace TcpTestLN.Specific
 {
     public class Restaurante
     {

@@ -1,4 +1,4 @@
-﻿using Entidades.Specific;
+﻿using TcpTestLN.Specific;   
 using System;
 using System.Data.SqlClient;
 

@@ -1,11 +1,10 @@
-﻿using Entidades.Enums;
-using Entidades.Generic;
-using Entidades.Handlers;
-using Entidades.Specific;
-using Newtonsoft.Json;
-using SimpleTCP;
+﻿using SimpleTCP;
 using System;
 using System.Windows.Forms;
+using TcpTestLN.Enums;
+using TcpTestLN.Generic;
+using TcpTestLN.Handlers;
+using TcpTestLN.Specific;
 
 namespace MonitorApp
 {
@@ -16,14 +15,12 @@ namespace MonitorApp
 
         public MainClient()
         {
-            InitializeComponent();            
+            InitializeComponent();
             EnableUIComponents(false);
         }
 
-
         private void Main_Load(object sender, EventArgs e)
         {
-            
             Random rnd = new Random();
 
             client = new SimpleTcpClient
@@ -38,7 +35,7 @@ namespace MonitorApp
         }
 
         private void Client_DataReceived(object sender, SimpleTCP.Message msg)
-        {            
+        {
             var objData = PackageHandler<Cliente>.DeserializePackage(msg.MessageString);
 
             if (objData is EventPackage<Cliente>)
@@ -46,7 +43,7 @@ namespace MonitorApp
                 Cliente cliente = null;
                 txtStatus.Invoke((MethodInvoker)delegate
                 {
-                    txtStatus.Text += "Server response Received..."+ Environment.NewLine;
+                    txtStatus.Text += "Server response Received..." + Environment.NewLine;
                     cliente = objData.GenericInstance;
 
                     if (cliente != null)
@@ -93,14 +90,13 @@ namespace MonitorApp
                     var request = PackageHandler<Cliente>.SerializePackage(myEvent);
                     client.WriteLineAndGetReply(request, TimeSpan.FromSeconds(3));
                 });
-
-               
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "An error has happening", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private void EnableUIComponents(bool enableUI)
         {
             txtMessage.Enabled = enableUI;

@@ -1,14 +1,12 @@
-﻿using Entidades;
-using Entidades.Generic;
-using Entidades.Handlers;
-using Entidades.Specific;
-using MonitorApp.AccesoDatos;
-using Newtonsoft.Json;
+﻿using MonitorApp.AccesoDatos;
 using SimpleTCP;
 using System;
-using System.Linq.Expressions;
 using System.Net;
 using System.Windows.Forms;
+using TcpTestLN.Enums;
+using TcpTestLN.Generic;
+using TcpTestLN.Handlers;
+using TcpTestLN.Specific;
 
 namespace MonitorApp.Presentacion
 {
@@ -43,19 +41,24 @@ namespace MonitorApp.Presentacion
                 case EventPackage<Cliente> cli:
                     switch (cli.ActionType)
                     {
-                        case Entidades.Enums.ActionTypes.Add:
+                        case ActionTypes.Add:
                             break;
-                        case Entidades.Enums.ActionTypes.Edit:
+
+                        case ActionTypes.Edit:
                             break;
-                        case Entidades.Enums.ActionTypes.Delete:
+
+                        case ActionTypes.Delete:
                             break;
-                        case Entidades.Enums.ActionTypes.List:
+
+                        case ActionTypes.List:
                             break;
-                        case Entidades.Enums.ActionTypes.GetSpecific:
+
+                        case ActionTypes.GetSpecific:
 
                             txtStatus.Invoke((MethodInvoker)delegate
                             {
                                 txtStatus.Text += $"Client request Received, procesing request...{Environment.NewLine}";
+                                string statusResponse = string.Empty;
 
                                 var clienteAD = new ClienteAD();
                                 var cliente = clienteAD.GetClienteById(cli.GenericInstance.IdCliente);
@@ -66,41 +69,32 @@ namespace MonitorApp.Presentacion
                                     //Serialize and package Object gotten
                                     string serializedResult = PackageHandler<Cliente>.SerializePackage(cli);
                                     msg.ReplyLine(serializedResult);
-                                    txtStatus.Text += $"Response sent...{Environment.NewLine}";
+                                    statusResponse = $"Response sent...{Environment.NewLine}";
                                 }
                                 else
                                 {
-                                    txtStatus.Text += "Client not found {Environment.NewLine}";
+                                    statusResponse = "Client not found {Environment.NewLine}";
                                 }
 
+                                txtStatus.Text += statusResponse;
                             });
 
                             break;
+
                         default:
                             break;
                     }
 
                     break;
+
                 default:
                     break;
             }
-
-            //if (objData is EventPackage<Cliente>)
-            //{
-
-                
-
-            //}
-
-
-            //Respond result and place it into monitor
-
-
-        }        
+        }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            txtStatus.Text += "Server Starting..." + Environment.NewLine;            
+            txtStatus.Text += "Server Starting..." + Environment.NewLine;
             IPAddress ip = IPAddress.Parse(txtHost.Text);
             server.Start(ip, Convert.ToInt32(txtPort.Text));
             btnStart.Enabled = false;
